@@ -1,0 +1,2 @@
+weird thing happening
+    - display works when serial monitor off, but fails when on

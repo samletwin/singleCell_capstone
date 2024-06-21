@@ -1,5 +1,3 @@
-// #define USE_WIFI
-#ifdef USE_WIFI
 
 #include <WiFi.h>       // standard library
 #include <WebServer.h>  // standard library
@@ -255,5 +253,3 @@ void printWifiStatus() {
   PRINT("Open http://");
   PRINT_LN(ip);
 }
-
-#endif /* USE_WIFI */

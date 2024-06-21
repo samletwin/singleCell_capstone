@@ -2,13 +2,13 @@
 #include "driver/gpio.h"
 #include "driver/adc.h"
 #include "esp32-hal-adc.h"
-#include "UI/display.h"
 #include "adc.h"
 #include "custom_types.h"
 #include "bms/soh.h"
 #include "bms/soc.h"
 #include <vector>
 #include "webpage/webpage.h"
+#include "main_cfg.h"
 /* ESP32 Arduino ADC Reference : https://github.com/espressif/arduino-esp32/blob/master/docs/en/api/adc.rst */
 /* SPI Docs: https://espressif-docs.readthedocs-hosted.com/projects/arduino-esp32/en/latest/api/spi.html *
 /
@@ -17,15 +17,7 @@
 ------------------------------------------------------------------------------------------------ */
 #define GPIO_SWITCH_OUT       14    // GPIO_NUM_14
 
-// #define USE_WEBSERVER  
-#define DEBUG_SERIAL
-#ifdef DEBUG_SERIAL
-#define PRINT_LN(test) Serial.println(test);
-#define PRINT(test) Serial.print(test);
-#else
-#define PRINT_LN(test) 
-#define PRINT(test) 
-#endif
+
 /* ------------------------------------------------------------------------------------------------
   CONSTANTS
 ------------------------------------------------------------------------------------------------ */
@@ -71,7 +63,6 @@ void loop() {
   webpage_MainFunc();
   #endif
   // PRINT_LN("Hey!");
-  // TFT_Loop();
   // adc_loop();
   adc_task();
   // if (globalWebpageData_s.measureSohSwitch_b == true && measureSohFlag_b == false) {

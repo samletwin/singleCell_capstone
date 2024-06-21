@@ -1,3 +1,3 @@
-.pio
-.vscode
-build
+.pio/
+.vscode/
+build/

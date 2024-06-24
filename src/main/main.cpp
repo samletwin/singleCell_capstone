@@ -15,7 +15,7 @@
 /* ------------------------------------------------------------------------------------------------
   DEFINES
 ------------------------------------------------------------------------------------------------ */
-#define GPIO_SWITCH_OUT       14    // GPIO_NUM_14
+#define GPIO_SWITCH_OUT      20    // GPIO_NUM_14
 
 
 /* ------------------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@
 /* ------------------------------------------------------------------------------------------------
   EXTERNALS
 ------------------------------------------------------------------------------------------------ */
-signalData_s globalSignalData_s;
+extern webpageGlobalData_s globalWebpageData_s;
 
 /* ------------------------------------------------------------------------------------------------
   LOCAL VARIABLES
@@ -44,8 +44,10 @@ void setup() {
   Serial.begin(115200);
   delay(5000);
 
+
+  
   /* Set pin modes */
-  // pinMode(GPIO_SWITCH_OUT, OUTPUT);
+  pinMode(GPIO_SWITCH_OUT, OUTPUT);
   
   adc_setup();
 
@@ -53,9 +55,6 @@ void setup() {
   #ifdef USE_WEBSERVER
   webpage_Setup();
   #endif
-
-  /* Start Display */
-  // TFT_Init();
 }
 
 void loop() {
@@ -64,7 +63,8 @@ void loop() {
   #endif
   // PRINT_LN("Hey!");
   // adc_loop();
-  adc_task();
+  // adc_task();
+  digitalWrite(GPIO_SWITCH_OUT, globalWebpageData_s.measureCurrentSwitch_b);
   // if (globalWebpageData_s.measureSohSwitch_b == true && measureSohFlag_b == false) {
   //   measureSohFlag_b = true;
   //   Main_MeasureSOH(globalWebpageData_s.numDischarges_ui8, globalWebpageData_s.dischargePeriod_ms_ui16, globalWebpageData_s.sampleRate_Hz_ui16);

@@ -1,7 +1,7 @@
 import numpy as np
 
 volt = [4002,4302,4103]
-current = [1015, 934, 875]
+current = [1015, 24, 400]
 
 def computeSoh(voltSamples: list, currentSamples: list, debug: bool = False):
     # Create the A matrix

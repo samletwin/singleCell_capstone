@@ -23,7 +23,7 @@
 #define AP_PASS "lolstorm"
 #define LOCAL_SSID "sam_google_wifi"
 #define LOCAL_PASS "Birds2002"
-#define USE_INTRANET
+// #define USE_INTRANET
 
 /* ------------------------------------------------------------------------------------------------
   EXTERNALS
@@ -182,7 +182,7 @@ void Process_SetAdcSampleRate() {
   /* Get value in input box and convert it to int */
   String inputValStr = server.arg("sampleRate");
   globalWebpageData_s.sampleRate_Hz_ui16 = (uint8)atoi(inputValStr.c_str());
-
+  globalWebpageData_s.sampleRateChanged_b = true;
   PRINT("Set sample rate to: "); PRINT_LN(globalWebpageData_s.sampleRate_Hz_ui16);
   server.send(200, "text/plain", inputValStr); //Send web page
 }

@@ -2,11 +2,12 @@
 #define ADC_H
 
 /* Config */
-#define DEBUG_ADC
+// #define DEBUG_ADC
+#define DEBUG_ADC_LOG
 
 /* API Functions */
 void adc_setup();
 void adc_loop();
-void adc_task();
+void IRAM_ATTR adc_task();
 
 #endif 

@@ -4,6 +4,7 @@
 #include "wizardy.h"   // .h file that stores your html page code
 #include "custom_types.h"
 #include "webpage.h"
+#include "../global_types.h"
 /* from: https://github.com/KrisKasprzak/ESP32_WebPage/blob/main/WebPageUpdate.ino */
 
 
@@ -43,7 +44,7 @@ WebServer server(80);
 /* ------------------------------------------------------------------------------------------------
   GLOBAL VARIABLES
 ------------------------------------------------------------------------------------------------ */
-extern webpageGlobalData_s globalWebpageData_s;
+extern webpageGlobalData_Type globalWebpageData_s;
 
 
 /* ------------------------------------------------------------------------------------------------

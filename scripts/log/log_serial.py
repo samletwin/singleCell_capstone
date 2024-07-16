@@ -11,7 +11,9 @@ serial_port = 'COM3'  # Change this to your serial port
 baud_rate = 115200  # Change this to your baud rate
 
 # Regular expression to match the expected format
-pattern = re.compile(r'Battery_Voltage:(\d+\.\d+),Battery_Current:(-?\d+\.\d+)')
+numItems = 2
+pattern = "^\d+\.\d{2}"
+pattern = re.compile(r'^\d+\.\d{2},\d+\.\d{2}$')
 
 # Flag to control logging state
 logging_enabled = False

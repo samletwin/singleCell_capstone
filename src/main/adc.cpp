@@ -1,10 +1,11 @@
-#include "Arduino.h"
 #include "driver/adc.h"
 #include "esp32-hal-adc.h"
 #include "custom_types.h"
 #include "adc.h"
 #include "mcp320x.h"
-#include "webpage/webpage.h"
+#include "global_types.h"
+#include "timer/timer.h"
+#include <vector>
 
 /* ------------------------------------------------------------------------------------------------
   DEFINES
@@ -30,34 +31,29 @@
 /* ------------------------------------------------------------------------------------------------
   GLOBALS
 ------------------------------------------------------------------------------------------------ */
+std::vector<float32> soh_voltageMeasurements_mV_f32 = std::vector<float32>();
+std::vector<float32> soh_currentMeasurements_mA_f32 = std::vector<float32>();
 
 /* ------------------------------------------------------------------------------------------------
   EXTERNAL VARIABLES
 ------------------------------------------------------------------------------------------------ */
-extern webpageGlobalData_s globalWebpageData_s;
+extern webpageGlobalData_Type globalWebpageData_s;
+extern adcGlobalData_Type adcGlobalData_s;
 
 /* ------------------------------------------------------------------------------------------------
   LOCAL VARIABLES
 ------------------------------------------------------------------------------------------------ */
 static MCP3202 adc(ADC_VREF, SPI_CS);
 static TaskHandle_t adcTaskHandle = NULL;
-
+static esp_timer_handle_t adcTimerHandle = NULL;
 /* ------------------------------------------------------------------------------------------------
   FUNCTION PROTOTYPES
 ------------------------------------------------------------------------------------------------ */
 static void adc_task(void *pvParameters);
 
 
-// Function to initialize a hardware timer
-void setupTimer(uint8_t timerNumber, uint32_t intervalMicros, void (*callback)()) {
-  hw_timer_t* timer = timerBegin(timerNumber, 80, true); // Use prescaler 80 for microsecond resolution
-  timerAttachInterrupt(timer, callback, true); // Attach the callback function
-  timerAlarmWrite(timer, intervalMicros, true); // Set the timer to fire every 'intervalMicros' microseconds
-  timerAlarmEnable(timer); // Enable the timer
-}
-
 // ISR callback to notify the task
-void IRAM_ATTR onTimer() {
+void IRAM_ATTR onTimer(void* arg) {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
   vTaskNotifyGiveFromISR(adcTaskHandle, &xHigherPriorityTaskWoken);
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
@@ -65,7 +61,7 @@ void IRAM_ATTR onTimer() {
 
 void adc_setup() {
   // Set the interval to 1 second (1000000 microseconds) for a 1Hz sampling rate
-  setupTimer(1, 1000000/ADC_DEFAULT_SAMPLE_RATE_HZ, onTimer);
+  adcTimerHandle = create_timer(0, 1000000/ADC_DEFAULT_SAMPLE_RATE_HZ, onTimer, true);
 
   // Create the ADC task
   xTaskCreate(adc_task, "ADC Task", ADC_TASK_STACK_SIZE, NULL, 1, &adcTaskHandle);
@@ -92,7 +88,7 @@ float32 adc_readBatteryVoltage() {
   uint16_t digital = adc.read(ADC_BATT_VOLTAGE_IN);
   uint16_t raw = adc.toAnalog(digital);
   float32 voltage_mV = static_cast<float32>(raw * ADC_BATT_VOLTAGE_SCALE);
-  return voltage_mV;
+  return voltage_mV;    
 }
 
 void adc_task(void *pvParameters) {
@@ -104,11 +100,18 @@ void adc_task(void *pvParameters) {
     globalWebpageData_s.voltageReading_mv_f32 = adc_readBatteryVoltage();
     globalWebpageData_s.currentReading_mA_f32 = adc_readCurrent();
 
+    if (true == adcGlobalData_s.storeAdcReadingsFlag_b) {
+      /* Append most recent measurement to end of vector */
+      soh_voltageMeasurements_mV_f32.push_back(globalWebpageData_s.voltageReading_mv_f32); 
+      soh_currentMeasurements_mA_f32.push_back(globalWebpageData_s.currentReading_mA_f32); 
+    }
+
     // Check if sample rate has changed and update timer if necessary
-    // if (globalWebpageData_s.sampleRateChanged_b == true && globalWebpageData_s.sampleRate_Hz_ui16 > 0) {
-    //     globalWebpageData_s.sampleRateChanged_b = false;
-    //     setupTimer(1, (globalWebpageData_s.sampleRate_Hz_ui16 * 1000), onTimer); // Adjusted to correct timer interval
-    // }
+    if (globalWebpageData_s.sampleRateChanged_b == true && globalWebpageData_s.sampleRate_Hz_ui16 > 0) {
+      globalWebpageData_s.sampleRateChanged_b = false;
+      delete_timer(adcTimerHandle);
+      adcTimerHandle = create_timer(1, (1000000/globalWebpageData_s.sampleRate_Hz_ui16), onTimer, true); 
+    }
 
     #ifdef DEBUG_ADC_LOG
     Serial.print(globalWebpageData_s.voltageReading_mv_f32);

@@ -15,7 +15,8 @@
 /* ------------------------------------------------------------------------------------------------
   DEFINES
 ------------------------------------------------------------------------------------------------ */
-#define GPIO_SWITCH_OUT      20    // GPIO_NUM_14
+#define GPIO_ENABLE_DISCHARGE      15  
+#define GPIO_ENABLE_CHARGE         13
 
 
 /* ------------------------------------------------------------------------------------------------
@@ -25,7 +26,7 @@
 /* ------------------------------------------------------------------------------------------------
   EXTERNALS
 ------------------------------------------------------------------------------------------------ */
-extern webpageGlobalData_s globalWebpageData_s;
+webpageGlobalData_s globalWebpageData_s;
 
 /* ------------------------------------------------------------------------------------------------
   LOCAL VARIABLES
@@ -45,16 +46,25 @@ void setup() {
   delay(5000);
 
 
-  
+  /* Init struct */
+  globalWebpageData_s = (webpageGlobalData_s){0};
+  globalWebpageData_s.currentReading_mA_f32 = 0.0;
+  globalWebpageData_s.chargeBatterySwitch_b = false;
+
   /* Set pin modes */
-  pinMode(GPIO_SWITCH_OUT, OUTPUT);
+  pinMode(GPIO_ENABLE_CHARGE, OUTPUT);
+  pinMode(GPIO_ENABLE_DISCHARGE, OUTPUT);
+
+  digitalWrite(GPIO_ENABLE_CHARGE, LOW);
+  digitalWrite(GPIO_ENABLE_DISCHARGE, LOW);
   
-  adc_setup();
 
   /* Start ESP32 Webserver */
   #ifdef USE_WEBSERVER
   webpage_Setup();
   #endif
+
+  adc_setup();
 }
 
 void loop() {
@@ -62,13 +72,14 @@ void loop() {
   webpage_MainFunc();
   #endif
   // PRINT_LN("Hey!");
-  // adc_loop();
-  // adc_task();
-  digitalWrite(GPIO_SWITCH_OUT, globalWebpageData_s.measureCurrentSwitch_b);
-  // if (globalWebpageData_s.measureSohSwitch_b == true && measureSohFlag_b == false) {
-  //   measureSohFlag_b = true;
-  //   Main_MeasureSOH(globalWebpageData_s.numDischarges_ui8, globalWebpageData_s.dischargePeriod_ms_ui16, globalWebpageData_s.sampleRate_Hz_ui16);
-  // }
+  // delay(1000);
+
+  digitalWrite(GPIO_ENABLE_DISCHARGE, globalWebpageData_s.dischargeBatterySwitch_b);
+  digitalWrite(GPIO_ENABLE_CHARGE, globalWebpageData_s.chargeBatterySwitch_b);
+  if (globalWebpageData_s.measureSohSwitch_b == true && measureSohFlag_b == false) {
+    measureSohFlag_b = true;
+    Main_MeasureSOH(globalWebpageData_s.numDischarges_ui8, globalWebpageData_s.dischargePeriod_ms_ui16, globalWebpageData_s.sampleRate_Hz_ui16);
+  }
 }
 
 void TestSOH() {
@@ -85,7 +96,7 @@ void Main_MeasureSOH(uint8 numDischarges_ui8, uint16 dischargePeriod_ms_ui16, ui
   delay(time);
   PRINT_LN("Finished SOH Measurement");
   measureSohFlag_b = false;
-  webpage_SetSohButtonStatus(true);
+  globalWebpageData_s.measureSohSwitch_b = false;
 }
 
 

@@ -8,15 +8,12 @@
 #include <SPI.h>
 #include <Mcp320x.h>
 
-#define SPI_CLK     21
-#define SPI_MOSI    22
-#define SPI_MISO    19
-#define SPI_CS      12
-#define ADC_VREF    5000     // 3.3V Vref
-#define ADC_CLK     1000000  // SPI clock 1.6MHz
+#define SPI_CS    	2 		   // SPI slave select
+#define ADC_VREF    3300     // 3.3V Vref
+#define ADC_CLK     1600000  // SPI clock 1.6MHz
 
 
-MCP3202 adc(ADC_VREF, SPI_CS);
+MCP3208 adc(ADC_VREF, SPI_CS);
 
 void setup() {
 
@@ -31,7 +28,7 @@ void setup() {
 
   // initialize SPI interface for MCP3208
   SPISettings settings(ADC_CLK, MSBFIRST, SPI_MODE0);
-  SPI.begin(SPI_CLK, SPI_MISO, SPI_MOSI, SPI_CS);
+  SPI.begin();
   SPI.beginTransaction(settings);
 }
 
@@ -44,7 +41,7 @@ void loop() {
   Serial.println("Reading...");
 
   t1 = micros();
-  uint16_t raw = adc.read(MCP3202::Channel::SINGLE_1);
+  uint16_t raw = adc.read(MCP3208::Channel::SINGLE_0);
   t2 = micros();
 
   // get analog value

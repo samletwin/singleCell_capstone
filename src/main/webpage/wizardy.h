@@ -1,63 +1,3 @@
-/*
-
-
-  OK, ya ready for some fun? HTML + CSS styling + javascript all in and undebuggable environment
-
-  one trick I've learned to how to debug HTML and CSS code.
-
-  get all your HTML code (from html to /html) and past it into this test site
-  muck with the HTML and CSS code until it's what you want
-  https://www.w3schools.com/html/tryit.asp?filename=tryhtml_intro
-
-  No clue how to debug javascrip other that write, compile, upload, refresh, guess, repeat
-
-  I'm using class designators to set styles and id's for data updating
-  for example:
-  the CSS class .tabledata defines with the cell will look like
-  <td><div class="tabledata" id = "switch"></div></td>
-
-  the XML code will update the data where id = "switch"
-  java script then uses getElementById
-  document.getElementById("switch").innerHTML="Switch is OFF";
-
-
-  .. now you can have the class define the look AND the class update the content, but you will then need
-  a class for every data field that must be updated, here's what that will look like
-  <td><div class="switch"></div></td>
-
-  the XML code will update the data where class = "switch"
-  java script then uses getElementsByClassName
-  document.getElementsByClassName("switch")[0].style.color=text_color;
-
-
-  the main general sections of a web page are the following and used here
-
-  <html>
-    <style>
-    // dump CSS style stuff in here
-    </style>
-    <body>
-      <header>
-      // put header code for cute banners here
-      </header>
-      <main>
-      // the buld of your web page contents
-      </main>
-      <footer>
-      // put cute footer (c) 2021 xyz inc type thing
-      </footer>
-    </body>
-    <script>
-    // you java code between these tags
-    </script>
-  </html>
-
-
-*/
-
-// note R"KEYWORD( html page code )KEYWORD"; 
-// again I hate strings, so char is it and this method let's us write naturally
-
 const char PAGE_MAIN[] PROGMEM = R"=====(
 
 <!DOCTYPE html>
@@ -251,12 +191,15 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
     <div class="category">Battery Controls</div>
     <br>
       <div class="bodytext">Start SOH Measurement: </div>
-      <button type="button" class = "btn" id = "btnSoh" onclick="startSohMeasurment()">Start</button>
-      </div>
+      <button type="button" class = "btn" id = "btnSoh" onclick="startSohMeasurement()">Start</button>
       <br>
-      <div class="bodytext">Battery Measurement Switch: </div>
-      <button type="button" class = "btn" id = "btn1" onclick="toggleCurrentMeasurement()">Toggle</button>
+      <div class="bodytext">Discharge Battery Switch: </div>
+      <button type="button" class = "btn" id = "btn1" onclick="toggleDischargeBattery()">Toggle</button>
+      <br>
+      <div class="bodytext">Charge Battery Switch: </div>
+      <button type="button" class="btn" id="btnCharge" onclick="toggleChargeBattery()">Turn ON</button>
       </div>
+      
       <br>
       <div class="bodytext">Discharge Period (in ms): </div>
       <input type="number" min="1" step="1" max="65535" id="dischargePeriod" name="dischargePeriodInput">
@@ -268,6 +211,17 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
       <button type="button" class="btn" id="setNumDischargeCycles" onclick="setNumDischargeCycles()">Set</button>
       <br>
 
+      
+      
+      <div class="bodytext">Charge Period (in ms): </div>
+      <input type="number" min="1" step="1" max="65535" id="chargePeriod" name="chargePeriodInput">
+      <button type="button" class="btn" id="setChargePeriod" onclick="setChargePeriod()">Set</button>
+      <br>
+      <div class="bodytext">Number of Charge Cycles: </div>
+      <input type="number" min="0" step="1" max="255" id="numChargeCycles" name="numChargeCyclesInput">
+      <button type="button" class="btn" id="setNumChargeCycles" onclick="setNumChargeCycles()">Set</button>
+      </div>
+      <br>
       <div class="bodytext">Sample Rate (in Hz): </div>
       <input type="number" min="1" step="1" max="100" id="sampleRate" name="sampleRateInput">
       <button type="button" class="btn" id="setSampleRate" onclick="setSampleRate()">Set</button>
@@ -313,56 +267,115 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
 
   <script type = "text/javascript">
   
-    // global variable visible to all java functions
-    var xmlHttp=createXmlHttpObject();
-
-    // function to create XML object
-    function createXmlHttpObject(){
-      if(window.XMLHttpRequest){
-        xmlHttp=new XMLHttpRequest();
-      }
-      else{
-        xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-      }
-      return xmlHttp;
+    function createXmlHttpObject() {
+      return new XMLHttpRequest();
     }
 
-    // function to handle button press from HTML code above
-    // and send a processing string back to server
-    // this processing string is use in the .on method
-    function startSohMeasurment() {
-      var xhttp = new XMLHttpRequest(); 
-      var message;
+    var xmlHttp = createXmlHttpObject();
 
-      
-      // Disable the button - don't re-enable until measurement is complete
-      // document.getElementById("btnSoh").disabled = true;
-      xhttp.open("PUT", "startSohMeasurment", false);
-      xhttp.send();
+    function updateValue(elementId, xmlResponse, xmlTag) {
+    var element = document.getElementById(elementId);
+    var value = xmlResponse.getElementsByTagName(xmlTag)[0].childNodes[0].nodeValue;
+    element.innerHTML = value;
+    var width = value / 40.95;
+    element.style.width = width + "%";
+    element.style.backgroundColor = value > 2048 ? "#aa0000" : "#0000aa";
+}
 
-      // if you want to handle an immediate reply (like status from the ESP
-      // handling of the button press use this code
-      // since this button status from the ESP is in the main XML code
-      // we don't need this
-      // remember that if you want immediate processing feedbac you must send it
-      // in the ESP handling function and here
-      // xhttp.onreadystatechange = function() {
-      //   if (this.readyState == 4 && this.status == 200
-      //     && this.responseText = "enableBtnSoh") {
-      //     document.getElementById("btnSoh").disabled = false;
-      //   }
-      // }
+function updateButtonState(buttonId, xmlResponse, xmlTag) {
+    var button = document.getElementById(buttonId);
+    if (!button) {
+        console.error(`Button with id "${buttonId}" not found`);
+        return;
     }
-
-
-    // function to handle button press from HTML code above
-    // and send a processing string back to server
-    // this processing string is use in the .on method
-    function toggleCurrentMeasurement() {
-      var xhttp = new XMLHttpRequest(); 
-      xhttp.open("PUT", "toggleCurrentMeasurement", false);
-      xhttp.send(); 
+    
+    var stateElement = xmlResponse.getElementsByTagName(xmlTag)[0];
+    if (!stateElement || !stateElement.childNodes[0]) {
+        console.error(`XML tag "${xmlTag}" not found or empty`);
+        return;
     }
+    
+    var state = stateElement.childNodes[0].nodeValue;
+    button.innerHTML = state === "1" ? "Turn OFF" : "Turn ON";
+    
+    // Disable the opposite button
+    var oppositeButtonId = buttonId === "btn1" ? "btnCharge" : "btn1";
+    var oppositeButton = document.getElementById(oppositeButtonId);
+    if (oppositeButton) {
+        oppositeButton.disabled = (state === "1");
+    }
+}
+
+function updateSohButtonState(xmlResponse) {
+    var sohStatus = xmlResponse.getElementsByTagName("SOHSTATUS")[0].childNodes[0].nodeValue;
+    var btnSoh = document.getElementById("btnSoh");
+    if (sohStatus === "1") {
+        btnSoh.innerHTML = "Measuring...";
+        btnSoh.disabled = true;
+        btnCharge.disabled = true;
+        btn1.disabled = true;
+    } else {
+        btnSoh.innerHTML = "Start";
+        btnSoh.disabled = false;
+        btnCharge.disabled = false;
+        btn1.disabled = false;
+    }
+}
+
+function updateDateTime() {
+    var dt = new Date();
+    document.getElementById("time").innerHTML = dt.toLocaleTimeString();
+    document.getElementById("date").innerHTML = dt.toLocaleDateString();
+}
+
+
+        function createXmlHttpObject() {
+            return new XMLHttpRequest();
+        }
+
+        function process() {
+    if (xmlHttp.readyState == 0 || xmlHttp.readyState == 4) {
+        xmlHttp.open("PUT", "xml", true);
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4) {
+                if (xmlHttp.status == 200) {
+                    try {
+                        var xmlResponse = xmlHttp.responseXML;
+                        if (!xmlResponse) {
+                            throw new Error("Invalid XML response");
+                        }
+
+                        // Update voltage and current
+                        updateValue("v0", xmlResponse, "V0");
+                        updateValue("v1", xmlResponse, "V1");
+
+                        // Update SOH measurement results
+                        updateValue("ocv", xmlResponse, "OCV");
+                        updateValue("r_o", xmlResponse, "R_O");
+                        updateValue("soc", xmlResponse, "SOC");
+                        updateValue("tts", xmlResponse, "TTS");
+
+                        // Update button states
+                        updateButtonState("btn1", xmlResponse, "DISCHARGESWITCH");
+                        updateButtonState("btnCharge", xmlResponse, "CHARGESWITCH");
+                        updateSohButtonState(xmlResponse);
+
+                        updateDateTime();
+
+                    } catch (e) {
+                        console.error("Error processing XML response:", e);
+                    }
+                } else {
+                    console.error("HTTP error:", xmlHttp.status);
+                }
+            }
+        };
+        xmlHttp.send(null);
+    }
+    setTimeout(process, 100);
+}
+
+
 
     function setDischargePeriod() {
       var xhttp = new XMLHttpRequest(); 
@@ -385,181 +398,42 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
       xhttp.send();
     }
 
-    // function to handle the response from the ESP
-    function response(){
-      var message;
-      var barwidth;
-      var currentsensor;
-      var xmlResponse;
-      var xmldoc;
-      var dt = new Date();
-      var color = "#e8e8e8";
-     
-      // get the xml stream
-      xmlResponse=xmlHttp.responseXML;
-  
-      // get host date and time
-      document.getElementById("time").innerHTML = dt.toLocaleTimeString();
-      document.getElementById("date").innerHTML = dt.toLocaleDateString();
-      
-      //volts for A0
-      xmldoc = xmlResponse.getElementsByTagName("V0"); 
-      message = xmldoc[0].firstChild.nodeValue;
-      if (message > 2048){
-        color = "#aa0000";
-      }
-      else {
-        color = "#0000aa";
-      }
-      
-      barwidth = message / 40.95;
-      document.getElementById("v0").innerHTML=message;
-      document.getElementById("v0").style.width=(barwidth+"%");
-      // you can set color dynamically, maybe blue below a value, red above
-      document.getElementById("v0").style.backgroundColor=color;
-      //document.getElementById("v0").style.borderRadius="5px";
-  
-      // Volts1    
-      xmldoc = xmlResponse.getElementsByTagName("V1");
-      message = xmldoc[0].firstChild.nodeValue;
-      if (message > 2048){
-        color = "#aa0000";
-      }
-      else {
-        color = "#0000aa";
-      }
-      width = message / 40.95;
-      document.getElementById("v1").innerHTML=message;
-      document.getElementById("v1").style.width=(width+"%");
-      document.getElementById("v1").style.backgroundColor=color;
-      //document.getElementById("v1").style.borderRadius="5px";
-
-      // OCV
-      xmldoc = xmlResponse.getElementsByTagName("OCV");
-      message = xmldoc[0].firstChild.nodeValue;
-      if (message > 2048){
-        color = "#aa0000";
-      }
-      else {
-        color = "#0000aa";
-      }
-      width = message / 40.95;
-      document.getElementById("ocv").innerHTML=message;
-      document.getElementById("ocv").style.width=(width+"%");
-      document.getElementById("ocv").style.backgroundColor=color;
-      //document.getElementById("ocv").style.borderRadius="5px";
-
-      // R_O   
-      xmldoc = xmlResponse.getElementsByTagName("R_O");
-      message = xmldoc[0].firstChild.nodeValue;
-      if (message > 2048){
-        color = "#aa0000";
-      }
-      else {
-        color = "#0000aa";
-      }
-      width = message / 40.95;
-      document.getElementById("r_o").innerHTML=message;
-      document.getElementById("r_o").style.width=(width+"%");
-      document.getElementById("r_o").style.backgroundColor=color;
-      //document.getElementById("r_o").style.borderRadius="5px";
-
-      // SOC 
-      xmldoc = xmlResponse.getElementsByTagName("SOC");
-      message = xmldoc[0].firstChild.nodeValue;
-      if (message > 2048){
-        color = "#aa0000";
-      }
-      else {
-        color = "#0000aa";
-      }
-      width = message / 40.95;
-      document.getElementById("soc").innerHTML=message;
-      document.getElementById("soc").style.width=(width+"%");
-      document.getElementById("soc").style.backgroundColor=color;
-      //document.getElementById("soc").style.borderRadius="5px";
-      
-      // TTS    
-      xmldoc = xmlResponse.getElementsByTagName("TTS");
-      message = xmldoc[0].firstChild.nodeValue;
-      if (message > 2048){
-        color = "#aa0000";
-      }
-      else {
-        color = "#0000aa";
-      }
-      width = message / 40.95;
-      document.getElementById("tts").innerHTML=message;
-      document.getElementById("tts").style.width=(width+"%");
-      document.getElementById("tts").style.backgroundColor=color;
-      //document.getElementById("tts").style.borderRadius="5px";
-
-      // xmldoc = xmlResponse.getElementsByTagName("SOH");
-      // message = xmldoc[0].firstChild.nodeValue;
-  
-      // if (message == 0){
-      //   document.getElementById("btnSoh").innerHTML="Measuring...";
-      // }
-      // else{
-      //   document.getElementById("btnSoh").innerHTML="Start";
-      // }
-         
-      xmldoc = xmlResponse.getElementsByTagName("SWITCH");
-      message = xmldoc[0].firstChild.nodeValue;
-      // update the text in the table
-      if (message == 0){
-        document.getElementById("btn1").innerHTML="Turn ON";
-      }
-      else {
-        document.getElementById("btn1").innerHTML="Turn OFF";
-      }
-     }
-  
-    // general processing code for the web page to ask for an XML steam
-    // this is actually why you need to keep sending data to the page to 
-    // force this call with stuff like this
-    // server.on("/xml", SendXML);
-    // otherwise the page will not request XML from the ESP, and updates will not happen
-    function process(){
-     
-     if(xmlHttp.readyState==0 || xmlHttp.readyState==4) {
-        xmlHttp.open("PUT","xml",true);
-        xmlHttp.onreadystatechange=response;
-        xmlHttp.send(null);
-      }       
-        // you may have to play with this value, big pages need more porcessing time, and hence
-        // a longer timeout
-        setTimeout("process()",100);
+    function setNumChargeCycles() {
+      var xhttp = new XMLHttpRequest(); 
+      var numChargeCycles = document.getElementById("numChargeCycles").value;
+      xhttp.open("PUT", "/setNumChargeCycles?numChargeCycles=" + numChargeCycles, true);
+      xhttp.send();
     }
 
-    function responseSoh() {
-      xmldoc = xmlResponse.getElementsByTagName("SOH");
-      message = xmldoc[0].firstChild.nodeValue;
-  
-      if (message == 0){
-        document.getElementById("btnSoh").innerHTML="Measuring...";
-      }
-      else{
-        document.getElementById("btnSoh").innerHTML="Start";
-      }
+    function setChargePeriod() {
+      var xhttp = new XMLHttpRequest(); 
+      var chargePeriod = document.getElementById("chargePeriod").value;
+      xhttp.open("PUT", "/setChargePeriod?chargePeriod=" + chargePeriod, true);
+      xhttp.send();
     }
-    function processSohButton(){
-     
-     if(xmlHttp.readyState==0 || xmlHttp.readyState==4) {
-        xmlHttp.open("PUT","xmlSoh",true);
-        xmlHttp.onreadystatechange=responseSoh;
-        xmlHttp.send(null);
-      }       
-        // you may have to play with this value, big pages need more porcessing time, and hence
-        // a longer timeout
-        setTimeout("processSohButton()",100);
-    }
+
+        function startSohMeasurement() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("PUT", "startSohMeasurement", true);
+    xhttp.send();
+}
+
+function toggleDischargeBattery() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("PUT", "toggleDischargeBattery", true);
+    xhttp.send();
+}
+
+function toggleChargeBattery() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("PUT", "toggleChargeBattery", true);
+    xhttp.send();
+}
+        
   
   
   </script>
 
 </html>
-
-
 
 )=====";

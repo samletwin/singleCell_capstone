@@ -41,11 +41,13 @@ static bool measureSohFlag_b = false;
 ------------------------------------------------------------------------------------------------ */
 void TestSOH();
 void Main_MeasureSOH();
+void Main_SOHTest(uint8 numIter, uint32 period_ms);
 
 void setup() {
   /* Begin serial communication */
   Serial.begin(115200);
-
+  delay(1000);
+  
   /* Init structs */
   globalWebpageData_s = (webpageGlobalData_Type){0};
   adcGlobalData_s = (adcGlobalData_Type){0};
@@ -64,6 +66,9 @@ void setup() {
   #endif
 
   adc_setup();
+  Serial.println("Waiting 20sec..");
+  delay(20000);
+  Main_SOHTest(5, 10000);
 }
 
 void loop() {
@@ -71,14 +76,13 @@ void loop() {
   webpage_MainFunc();
   #endif
   // PRINT_LN("Hey!");
-  delay(1000);
-  TestSOH();
-
-  digitalWrite(GPIO_ENABLE_DISCHARGE, globalWebpageData_s.dischargeBatterySwitch_b);
-  digitalWrite(GPIO_ENABLE_CHARGE, globalWebpageData_s.chargeBatterySwitch_b);
+  // delay(1000);
+  // TestSOH();
+  // digitalWrite(GPIO_ENABLE_DISCHARGE, globalWebpageData_s.dischargeBatterySwitch_b);
+  // digitalWrite(GPIO_ENABLE_CHARGE, globalWebpageData_s.chargeBatterySwitch_b);
   if (globalWebpageData_s.measureSohSwitch_b == true && measureSohFlag_b == false) {
     measureSohFlag_b = true;
-    Main_MeasureSOH();
+    // Main_MeasureSOH();
   }
 }
 
@@ -98,6 +102,19 @@ void Main_MeasureSOH() {
   PRINT_LN("Finished SOH Measurement");
   measureSohFlag_b = false;
   globalWebpageData_s.measureSohSwitch_b = false;
+}
+
+void Main_SOHTest(uint8 numIter, uint32 period_ms) {
+  for (uint8 i = 0; i < numIter; i++) {
+    digitalWrite(GPIO_ENABLE_CHARGE, HIGH);
+    delay(period_ms);
+    digitalWrite(GPIO_ENABLE_CHARGE, LOW);
+    delay(100); /* Wait a bit b4 discharging */
+    digitalWrite(GPIO_ENABLE_DISCHARGE, HIGH);
+    delay(period_ms);
+    digitalWrite(GPIO_ENABLE_DISCHARGE, LOW);
+    delay(100);
+  }
 }
 
 

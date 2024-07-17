@@ -1,19 +1,16 @@
 import serial
 import csv
-import re
 import time
 from datetime import datetime
 import os
 import signal
 
 # Configure the serial port
-serial_port = 'COM3'  # Change this to your serial port
+serial_port = 'COM6'  # Change this to your serial port
 baud_rate = 115200  # Change this to your baud rate
 
-# Regular expression to match the expected format
-numItems = 2
-pattern = "^\d+\.\d{2}"
-pattern = re.compile(r'^\d+\.\d{2},\d+\.\d{2}$')
+# Define the required number of commas for valid data
+required_commas = 1
 
 # Flag to control logging state
 logging_enabled = False
@@ -65,22 +62,24 @@ def start_logging():
 def process_line(line):
     global logging_enabled, writer, last_print_time
 
-    match = pattern.match(line)
-    if match:
-        battery_voltage = match.group(1)
-        battery_current = match.group(2)
-        elapsed_time = round(time.time() - start_time, 2)  # Calculate elapsed time
-        current_time = time.time()
+    if line.count(',') == required_commas:
+        parts = line.split(',')
+        if len(parts) == (required_commas + 1):
+            battery_voltage = parts[0].strip()
+            battery_current = parts[1].strip()
+            elapsed_time = round(time.time() - start_time, 2)  # Calculate elapsed time
+            current_time = time.time()
 
-        if logging_enabled:
-            writer.writerow([elapsed_time, battery_voltage, battery_current])
-        # Print only if the interval has passed
-        if current_time - last_print_time >= print_interval:
-            last_print_time = current_time
-            
-            print(f"Elapsed_Time={elapsed_time}s, Battery_Voltage={battery_voltage}, Battery_Current={battery_current}")
+            if logging_enabled:
+                writer.writerow([elapsed_time, battery_voltage, battery_current])
+            # Print only if the interval has passed
+            if current_time - last_print_time >= print_interval:
+                last_print_time = current_time
+                print(f"Elapsed_Time={elapsed_time}s, Battery_Voltage={battery_voltage}, Battery_Current={battery_current}")
+        else:
+            print(f"Ignored (unexpected parts count): {line}")
     else:
-        print(f"Ignored: {line}")
+        print(f"Ignored (wrong comma count): {line}")
 
 # Setup signal handler for Ctrl-C
 signal.signal(signal.SIGINT, signal_handler)

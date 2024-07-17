@@ -15,12 +15,12 @@
 
 #define ADC_TASK_STACK_SIZE 4096
 
-#define R1 10000
-#define R2 20000
+#define R1 9998
+#define R2 20130
 #define ADC_BATT_VOLTAGE_SCALE (R1+R2)/R2
 #define ADC_CURRENT_SCALE (1000/400) /* 400mV/A scaling - divide by 400 to get A, multiply by 1000 to get mA*/
 
-#define ADC_DEFAULT_SAMPLE_RATE_HZ 10
+#define ADC_DEFAULT_SAMPLE_RATE_HZ 1
 
 #define SPI_CS    	12 		   // SPI slave select
 #define SPI_CLK     21

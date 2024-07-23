@@ -26,7 +26,7 @@
 #define SPI_CLK     21
 #define SPI_MOSI    22
 #define SPI_MISO    19
-#define ADC_VREF    5000     // 5V Vref
+#define ADC_VREF    5073     // 5V Vref
 #define ADC_CLK     1000000  // SPI clock 1.6MHz
 /* ------------------------------------------------------------------------------------------------
   GLOBALS

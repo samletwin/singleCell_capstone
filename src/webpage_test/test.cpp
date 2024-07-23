@@ -63,8 +63,8 @@
 #define USE_INTRANET
 
 // replace this with your homes intranet connect parameters
-#define LOCAL_SSID "sam_google_wifi"
-#define LOCAL_PASS "Birds2002"
+#define LOCAL_SSID ""
+#define LOCAL_PASS ""
 
 // once  you are read to go live these settings are what you client will connect to
 #define AP_SSID "TestWebSite"

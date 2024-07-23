@@ -22,8 +22,8 @@
 
 #define AP_SSID "ESP32"
 #define AP_PASS "lolstorm"
-#define LOCAL_SSID "sam_google_wifi"
-#define LOCAL_PASS "Birds2002"
+#define LOCAL_SSID ""
+#define LOCAL_PASS ""
 // #define USE_INTRANET
 
 /* ------------------------------------------------------------------------------------------------

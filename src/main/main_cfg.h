@@ -1,7 +1,7 @@
 #ifndef MAIN_CFG_H
 #define MAIN_CFG_H
 
-// #define USE_WEBSERVER  
+#define USE_WEBSERVER  
 #define DEBUG_SERIAL
 #ifdef DEBUG_SERIAL
 #define PRINT_LN(test) Serial.println(test);

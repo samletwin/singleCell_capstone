@@ -3,7 +3,7 @@
 
 #include "custom_types.h"
 
-#define USE_INTRANET
+// #define USE_INTRANET
 
 
 /* API Functions */

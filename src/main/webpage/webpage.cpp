@@ -225,7 +225,7 @@ void SendXML() {
   len += snprintf(XML + len, sizeof(XML) - len, "<OCV>%.2f</OCV>\n", globalWebpageData_s.ocvResult_V_f32);
   len += snprintf(XML + len, sizeof(XML) - len, "<R_O>%.5f</R_O>\n", globalWebpageData_s.internalResistanceResult_Ohms_f32);
   len += snprintf(XML + len, sizeof(XML) - len, "<SOC>%.2f</SOC>\n", globalWebpageData_s.socResult_perc_f32);
-  len += snprintf(XML + len, sizeof(XML) - len, "<TTS>%u</TTS>\n", globalWebpageData_s.ttsResult_S_ui32);
+  len += snprintf(XML + len, sizeof(XML) - len, "<TTS>%.1f</TTS>\n", (float)globalWebpageData_s.ttsResult_S_ui32);
 
   // Button states
   len += snprintf(XML + len, sizeof(XML) - len, "<DISCHARGESWITCH>%d</DISCHARGESWITCH>\n", (uint8)globalWebpageData_s.dischargeBatterySwitch_b);

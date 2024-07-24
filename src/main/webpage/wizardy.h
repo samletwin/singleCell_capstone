@@ -188,6 +188,40 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
       </table>
     </div>
     <br>
+    <div class="category">SOH/SOC Results</div>
+      <div style="border-radius: 10px !important;">
+      <table style="width:50%">
+      <colgroup>
+        <col span="1" style="background-color:rgb(230,230,230); width: 20%; color:#000000 ;">
+        <col span="1" style="background-color:rgb(200,200,200); width: 15%; color:#000000 ;">
+        <col span="1" style="background-color:rgb(180,180,180); width: 15%; color:#000000 ;">
+      </colgroup>
+      <col span="2"style="background-color:rgb(0,0,0); color:#FFFFFF">
+      <col span="2"style="background-color:rgb(0,0,0); color:#FFFFFF">
+      <col span="2"style="background-color:rgb(0,0,0); color:#FFFFFF">
+      <tr>
+        <th colspan="1"><div class="heading">Measurement</div></th>
+        <th colspan="1"><div class="heading">Value</div></th>
+      </tr>
+      <tr>
+        <td><div class="bodytext">OCV (V)</div></td>
+        <td><div class="tabledata" id = "ocv"></div></td>
+      </tr>
+      <tr>
+        <td><div class="bodytext">Internal Resistance (Ohms)</div></td>
+        <td><div class="tabledata" id = "r_o"></div></td>
+      </tr>
+      <tr>
+        <td><div class="bodytext">SOC (%)</div></td>
+        <td><div class="tabledata" id = "soc"></div></td>
+      </tr>
+      <tr>
+        <td><div class="bodytext">TTS (s)</div></td>
+        <td><div class="tabledata" id = "tts"></div></td>
+      </table>
+    </div>
+    <br>
+
     <div class="category">Battery Controls</div>
     <br>
       <div class="bodytext">Start SOH Measurement: </div>
@@ -222,42 +256,11 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
       <button type="button" class="btn" id="setNumChargeCycles" onclick="setNumChargeCycles()">Set</button>
       </div>
       <br>
-      <div class="bodytext">Sample Rate (in Hz): </div>
+      <div class="bodytext">ADC Sample Rate (in Hz): </div>
       <input type="number" min="1" step="1" max="100" id="sampleRate" name="sampleRateInput">
       <button type="button" class="btn" id="setSampleRate" onclick="setSampleRate()">Set</button>
     <br>
-    <div class="category">SOH/SOC Results</div>
-      <div style="border-radius: 10px !important;">
-      <table style="width:50%">
-      <colgroup>
-        <col span="1" style="background-color:rgb(230,230,230); width: 20%; color:#000000 ;">
-        <col span="1" style="background-color:rgb(200,200,200); width: 15%; color:#000000 ;">
-        <col span="1" style="background-color:rgb(180,180,180); width: 15%; color:#000000 ;">
-      </colgroup>
-      <col span="2"style="background-color:rgb(0,0,0); color:#FFFFFF">
-      <col span="2"style="background-color:rgb(0,0,0); color:#FFFFFF">
-      <col span="2"style="background-color:rgb(0,0,0); color:#FFFFFF">
-      <tr>
-        <th colspan="1"><div class="heading">Measurement</div></th>
-        <th colspan="1"><div class="heading">Value</div></th>
-      </tr>
-      <tr>
-        <td><div class="bodytext">OCV (V)</div></td>
-        <td><div class="tabledata" id = "ocv"></div></td>
-      </tr>
-      <tr>
-        <td><div class="bodytext">Internal Resistance (Ohms)</div></td>
-        <td><div class="tabledata" id = "r_o"></div></td>
-      </tr>
-      <tr>
-        <td><div class="bodytext">SOC (%)</div></td>
-        <td><div class="tabledata" id = "soc"></div></td>
-      </tr>
-      <tr>
-        <td><div class="bodytext">TTS (s)</div></td>
-        <td><div class="tabledata" id = "tts"></div></td>
-      </table>
-    </div>
+    
 
   </main>
 

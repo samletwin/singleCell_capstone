@@ -34,7 +34,7 @@ adcGlobalData_Type adcGlobalData_s;
   LOCAL VARIABLES
 ------------------------------------------------------------------------------------------------ */
 static bool measureSohFlag_b = false;
-
+static FuelGauge batteryClass(4.2f, 0.001f, 3.0f, 0, 1); 
 
 /* ------------------------------------------------------------------------------------------------
   FUNCTION PROTOTYPES
@@ -59,6 +59,8 @@ void setup() {
   digitalWrite(GPIO_ENABLE_CHARGE, LOW);
   digitalWrite(GPIO_ENABLE_DISCHARGE, LOW);
   
+  /* Setup feul gauge*/
+
 
   /* Start ESP32 Webserver */
   #ifdef USE_WEBSERVER

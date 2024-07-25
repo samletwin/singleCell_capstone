@@ -31,7 +31,6 @@ extern std::vector<float32> soh_currentMeasurements_mA_f32;
 ------------------------------------------------------------------------------------------------ */
 webpageGlobalData_Type globalWebpageData_s;
 adcGlobalData_Type adcGlobalData_s;
-FuelGauge batteryClass(4.2f, 0.001f, 3.0f, 0, 1); 
 
 /* ------------------------------------------------------------------------------------------------
   LOCAL VARIABLES

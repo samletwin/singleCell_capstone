@@ -116,14 +116,14 @@ void adc_task(void *pvParameters) {
     globalWebpageData_s.voltageReading_mv_f32 = voltage_mV;
     globalWebpageData_s.currentReading_mA_f32 = current_mA;
 
-    if (voltage_mV != 0.0f && !batteryDetected_b) {
+    if (voltage_mV >= 2.0f && !batteryDetected_b) {
       batteryDetected_b = true;
       float soc_init = soc_initialize(current_mA / 1000.0f, voltage_mV / 1000.0f);
       globalWebpageData_s.socResult_perc_f32 = soc_init * 100.0f;
     }
     else if (voltage_mV != 0.0f) {
       float soc_updated = soc_update(current_mA / 1000.0f);
-      globalWebpageData_s.socResult_perc_f32 = soc_update * 100.0f;
+      globalWebpageData_s.socResult_perc_f32 = soc_updated * 100.0f;
     }
     else {
       batteryDetected_b = false;

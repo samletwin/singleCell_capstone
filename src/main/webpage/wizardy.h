@@ -154,18 +154,7 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
 
   <body style="background-color: #efefef" onload="process()">
   
-    <header>
-      <div class="navbar fixed-top">
-          <div class="container">
-            <div class="navtitle">Single Cell Data Characterization</div>
-            <div class="navdata" id = "date">mm/dd/yyyy</div>
-            <div class="navheading">DATE</div><br>
-            <div class="navdata" id = "time">00:00:00</div>
-            <div class="navheading">TIME</div>
-            
-          </div>
-      </div>
-    </header>
+    
   
     <main class="container" style="margin-top:70px">
       <div class="category">Battery Readings</div>
@@ -360,7 +349,6 @@ const char PAGE_MAIN[] PROGMEM = R"=====(
                             // Update battery status
                             updateBatteryStatus(xmlResponse);
 
-                            updateDateTime();
 
                         } catch (e) {
                             console.error("Error processing XML response:", e);

@@ -22,9 +22,9 @@
 
 #define AP_SSID "ESP32"
 #define AP_PASS "lolstorm"
-#define LOCAL_SSID "sam_google_wifi"
-#define LOCAL_PASS "Baba5761"
-#define USE_INTRANET
+#define LOCAL_SSID ""
+#define LOCAL_PASS ""
+// #define USE_INTRANET
 
 /* ------------------------------------------------------------------------------------------------
   EXTERNALS
@@ -107,7 +107,7 @@ void webpage_Setup() {
   // add as many as you need to process incoming strings from your web page
   // as you can imagine you will need to code some javascript in your web page to send such strings
   // this process will be documented in the SuperMon.h web page code
-  server.on("/startSohMeasurment", HTTP_PUT, Process_StartSohMeasurment);
+  server.on("/startSohMeasurement", HTTP_PUT, Process_StartSohMeasurment);
   server.on("/toggleDischargeBattery", HTTP_PUT, Process_ToggleDischargeBattery);
   server.on("/toggleChargeBattery", HTTP_PUT, Process_ToggleChargeBattery);
   server.on("/setDischargePeriod", HTTP_PUT, Process_SetDischargePeriod);
@@ -173,9 +173,9 @@ void Process_SetNumCycles() {
   PRINT_LN("Set charge cycles pressed");
   /* Get value in input box and convert it to int */
   String inputValStr = server.arg("numCycles");
-  globalWebpageData_s.numCharges_ui8 = (uint8)atoi(inputValStr.c_str());
+  globalWebpageData_s.numCycles_ui8 = (uint8)atoi(inputValStr.c_str());
 
-  PRINT("Set charge cycles to: "); PRINT_LN(globalWebpageData_s.numCharges_ui8);
+  PRINT("Set num cycles to: "); PRINT_LN(globalWebpageData_s.numCycles_ui8);
   server.send(200, "text/plain", inputValStr); //Send web page
 }
 
@@ -217,7 +217,7 @@ void SendXML() {
   len += snprintf(XML + len, sizeof(XML) - len, "<CHARGESWITCH>%d</CHARGESWITCH>\n", (uint8)globalWebpageData_s.chargeBatterySwitch_b);
   len += snprintf(XML + len, sizeof(XML) - len, "<SOHSTATUS>%d</SOHSTATUS>\n", (uint8)globalWebpageData_s.measureSohSwitch_b);
 
-  len += snprintf(XML + len, sizeof(XML) - len, "<BATTERYCONNECTED>%d</BATTERYCONNECTED>\n", (uint8)globalWebpageData_s.batteryConnected_b);
+  len += snprintf(XML + len, sizeof(XML) - len, "<BATTERYCONNECTED>%d</BATTERYCONNECTED>\n", (uint8)globalWebpageData_s.batteryDetected_b);
 
   len += snprintf(XML + len, sizeof(XML) - len, "</Data>\n");
 

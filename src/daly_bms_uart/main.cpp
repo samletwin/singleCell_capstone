@@ -2,10 +2,11 @@
 #include "bms/daly-bms-uart.h"
 #include <HardwareSerial.h>
 
+static HardwareSerial mySerial = HardwareSerial(1); 
 static Daly_BMS_UART bms(mySerial);
 
-#define DALY_RX 16
-#define DALY_TX 17
+#define DALY_RX 5
+#define DALY_TX 6
 
 void setup() {
   /* Begin serial communication */

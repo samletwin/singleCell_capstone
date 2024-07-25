@@ -3,7 +3,7 @@
 
 /* Config */
 // #define DEBUG_ADC
-// #define DEBUG_ADC_LOG
+#define DEBUG_ADC_LOG
 
 /* API Functions */
 void adc_setup();

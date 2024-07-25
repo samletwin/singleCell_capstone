@@ -8,7 +8,7 @@ typedef struct {
     float32 ocvResult_V_f32;
     float32 internalResistanceResult_Ohms_f32;
     float32 socResult_perc_f32;
-    uint64 ttsResult_S_ui32;;
+    float32 ttsResult_S_f32;
     uint16 dischargePeriod_ms_ui16;
     uint16 chargePeriod_ms_ui16;
     uint16 sampleRate_Hz_ui16;

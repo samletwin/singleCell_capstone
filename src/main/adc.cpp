@@ -6,6 +6,7 @@
 #include "global_types.h"
 #include "timer/timer.h"
 #include <vector>
+#include "bms/soc.h"
 
 /* ------------------------------------------------------------------------------------------------
   DEFINES
@@ -39,6 +40,7 @@ std::vector<float32> soh_currentMeasurements_mA_f32 = std::vector<float32>();
 ------------------------------------------------------------------------------------------------ */
 extern webpageGlobalData_Type globalWebpageData_s;
 extern adcGlobalData_Type adcGlobalData_s;
+extern FuelGauge batteryClass;
 
 /* ------------------------------------------------------------------------------------------------
   LOCAL VARIABLES
@@ -46,6 +48,7 @@ extern adcGlobalData_Type adcGlobalData_s;
 static MCP3202 adc(ADC_VREF, SPI_CS);
 static TaskHandle_t adcTaskHandle = NULL;
 static esp_timer_handle_t adcTimerHandle = NULL;
+static bool batteryDetected_b = false;
 /* ------------------------------------------------------------------------------------------------
   FUNCTION PROTOTYPES
 ------------------------------------------------------------------------------------------------ */
@@ -99,6 +102,22 @@ void adc_task(void *pvParameters) {
     // Perform the necessary ADC readings
     globalWebpageData_s.voltageReading_mv_f32 = adc_readBatteryVoltage();
     globalWebpageData_s.currentReading_mA_f32 = adc_readCurrent();
+
+    if (globalWebpageData_s.voltageReading_mv_f32 != 0.0f && batteryDetected_b == false) {
+      batteryDetected_b = true;
+      batteryClass.initialize(globalWebpageData_s.currentReading_mA_f32/1000, globalWebpageData_s.voltageReading_mv_f32/1000,
+        &globalWebpageData_s.socResult_perc_f32, &globalWebpageData_s.ttsResult_S_f32);
+        globalWebpageData_s.socResult_perc_f32*=100;
+
+    }
+    else if (globalWebpageData_s.voltageReading_mv_f32 != 0.0f) {
+      batteryClass.update(globalWebpageData_s.currentReading_mA_f32/1000, &globalWebpageData_s.socResult_perc_f32, 
+        &globalWebpageData_s.ttsResult_S_f32);
+        globalWebpageData_s.socResult_perc_f32*=100;
+    }
+    else {
+      batteryDetected_b = false;
+    }
 
     if (true == adcGlobalData_s.storeAdcReadingsFlag_b) {
       /* Append most recent measurement to end of vector */

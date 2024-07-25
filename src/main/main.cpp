@@ -29,12 +29,12 @@
 ------------------------------------------------------------------------------------------------ */
 webpageGlobalData_Type globalWebpageData_s;
 adcGlobalData_Type adcGlobalData_s;
+FuelGauge batteryClass(4.2f, 0.001f, 3.0f, 0, 1); 
 
 /* ------------------------------------------------------------------------------------------------
   LOCAL VARIABLES
 ------------------------------------------------------------------------------------------------ */
 static bool measureSohFlag_b = false;
-static FuelGauge batteryClass(4.2f, 0.001f, 3.0f, 0, 1); 
 
 /* ------------------------------------------------------------------------------------------------
   FUNCTION PROTOTYPES
@@ -59,9 +59,6 @@ void setup() {
   digitalWrite(GPIO_ENABLE_CHARGE, LOW);
   digitalWrite(GPIO_ENABLE_DISCHARGE, LOW);
   
-  /* Setup feul gauge*/
-
-
   /* Start ESP32 Webserver */
   #ifdef USE_WEBSERVER
   webpage_Setup();
@@ -80,8 +77,8 @@ void loop() {
   // PRINT_LN("Hey!");
   // delay(1000);
   // TestSOH();
-  // digitalWrite(GPIO_ENABLE_DISCHARGE, globalWebpageData_s.dischargeBatterySwitch_b);
-  // digitalWrite(GPIO_ENABLE_CHARGE, globalWebpageData_s.chargeBatterySwitch_b);
+  digitalWrite(GPIO_ENABLE_DISCHARGE, globalWebpageData_s.dischargeBatterySwitch_b);
+  digitalWrite(GPIO_ENABLE_CHARGE, globalWebpageData_s.chargeBatterySwitch_b);
   if (globalWebpageData_s.measureSohSwitch_b == true && measureSohFlag_b == false) {
     measureSohFlag_b = true;
     // Main_MeasureSOH();

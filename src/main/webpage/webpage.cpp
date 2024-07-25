@@ -22,9 +22,9 @@
 
 #define AP_SSID "ESP32"
 #define AP_PASS "lolstorm"
-#define LOCAL_SSID ""
-#define LOCAL_PASS ""
-// #define USE_INTRANET
+#define LOCAL_SSID "sam_google_wifi"
+#define LOCAL_PASS "Baba5761"
+#define USE_INTRANET
 
 /* ------------------------------------------------------------------------------------------------
   EXTERNALS
@@ -54,9 +54,8 @@ void Process_StartSohMeasurment();
 void Process_ToggleDischargeBattery();
 void Process_ToggleChargeBattery();
 void Process_SetDischargePeriod();
-void Process_SetNumDischargeCycles();
 void Process_SetChargePeriod();
-void Process_SetNumChargeCycles();
+void Process_SetNumCycles();
 void Process_SetAdcSampleRate();
 void SendWebsite();
 void SendXML();
@@ -112,8 +111,7 @@ void webpage_Setup() {
   server.on("/toggleDischargeBattery", HTTP_PUT, Process_ToggleDischargeBattery);
   server.on("/toggleChargeBattery", HTTP_PUT, Process_ToggleChargeBattery);
   server.on("/setDischargePeriod", HTTP_PUT, Process_SetDischargePeriod);
-  server.on("/setNumDischargeCycles", HTTP_PUT, Process_SetNumDischargeCycles);
-  server.on("/setNumChargeCycles", HTTP_PUT, Process_SetNumChargeCycles);
+  server.on("/setNumCycles", HTTP_PUT, Process_SetNumCycles);
   server.on("/setChargePeriod", HTTP_PUT, Process_SetChargePeriod);
   server.on("/setSampleRate", HTTP_PUT, Process_SetAdcSampleRate);
 
@@ -161,17 +159,6 @@ void Process_SetDischargePeriod() {
   server.send(200, "text/plain", inputValStr); //Send web page
 }
 
-/* Set Num Discharge Cycles Button pressed */
-void Process_SetNumDischargeCycles() {
-  PRINT_LN("Set discharge cycles pressed");
-  /* Get value in input box and convert it to int */
-  String inputValStr = server.arg("numDischargeCycles");
-  globalWebpageData_s.numDischarges_ui8 = (uint8)atoi(inputValStr.c_str());
-
-  PRINT("Set discharge cycles to: "); PRINT_LN(globalWebpageData_s.numDischarges_ui8);
-  server.send(200, "text/plain", inputValStr); //Send web page
-}
-
 void Process_SetChargePeriod() {
   PRINT_LN("Set charge period pressed");
   /* Get value in input box and convert it to int */
@@ -182,10 +169,10 @@ void Process_SetChargePeriod() {
   server.send(200, "text/plain", inputValStr); //Send web page
 }
 
-void Process_SetNumChargeCycles() {
+void Process_SetNumCycles() {
   PRINT_LN("Set charge cycles pressed");
   /* Get value in input box and convert it to int */
-  String inputValStr = server.arg("numChargeCycles");
+  String inputValStr = server.arg("numCycles");
   globalWebpageData_s.numCharges_ui8 = (uint8)atoi(inputValStr.c_str());
 
   PRINT("Set charge cycles to: "); PRINT_LN(globalWebpageData_s.numCharges_ui8);
@@ -222,15 +209,15 @@ void SendXML() {
   len += snprintf(XML + len, sizeof(XML) - len, "<V1>%.2f</V1>\n", globalWebpageData_s.currentReading_mA_f32);
 
   // SOH measurement results
-  len += snprintf(XML + len, sizeof(XML) - len, "<OCV>%.2f</OCV>\n", globalWebpageData_s.ocvResult_V_f32);
-  len += snprintf(XML + len, sizeof(XML) - len, "<R_O>%.5f</R_O>\n", globalWebpageData_s.internalResistanceResult_Ohms_f32);
+  len += snprintf(XML + len, sizeof(XML) - len, "<R_O>%.2f</R_O>\n", globalWebpageData_s.internalResistanceResult_mOhms_f32);
   len += snprintf(XML + len, sizeof(XML) - len, "<SOC>%.2f</SOC>\n", globalWebpageData_s.socResult_perc_f32);
-  len += snprintf(XML + len, sizeof(XML) - len, "<TTS>%.1f</TTS>\n", globalWebpageData_s.ttsResult_S_f32);
 
   // Button states
   len += snprintf(XML + len, sizeof(XML) - len, "<DISCHARGESWITCH>%d</DISCHARGESWITCH>\n", (uint8)globalWebpageData_s.dischargeBatterySwitch_b);
   len += snprintf(XML + len, sizeof(XML) - len, "<CHARGESWITCH>%d</CHARGESWITCH>\n", (uint8)globalWebpageData_s.chargeBatterySwitch_b);
   len += snprintf(XML + len, sizeof(XML) - len, "<SOHSTATUS>%d</SOHSTATUS>\n", (uint8)globalWebpageData_s.measureSohSwitch_b);
+
+  len += snprintf(XML + len, sizeof(XML) - len, "<BATTERYCONNECTED>%d</BATTERYCONNECTED>\n", (uint8)globalWebpageData_s.batteryConnected_b);
 
   len += snprintf(XML + len, sizeof(XML) - len, "</Data>\n");
 

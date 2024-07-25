@@ -21,8 +21,10 @@
 
 
 /* ------------------------------------------------------------------------------------------------
-  CONSTANTS
+  EXTERNALS
 ------------------------------------------------------------------------------------------------ */
+extern std::vector<float32> soh_voltageMeasurements_mV_f32;
+extern std::vector<float32> soh_currentMeasurements_mA_f32;
 
 /* ------------------------------------------------------------------------------------------------
   GLOBALS
@@ -81,7 +83,7 @@ void loop() {
   digitalWrite(GPIO_ENABLE_CHARGE, globalWebpageData_s.chargeBatterySwitch_b);
   if (globalWebpageData_s.measureSohSwitch_b == true && measureSohFlag_b == false) {
     measureSohFlag_b = true;
-    // Main_MeasureSOH();
+    Main_MeasureSOH();
   }
 }
 
@@ -95,12 +97,35 @@ void TestSOH() {
 
 void Main_MeasureSOH() {
   PRINT_LN("Starting SOH Measurement");
-
-  uint32 time = globalWebpageData_s.dischargePeriod_ms_ui16 * 2 * globalWebpageData_s.numDischarges_ui8;
-  delay(time);
+  adcGlobalData_s.storeAdcReadingsFlag_b = true;
+  delay(10000); 
+  for (uint8 i = 0; i < globalWebpageData_s.numCycles_ui8; i++) {
+    digitalWrite(GPIO_ENABLE_CHARGE, HIGH);
+    delay(globalWebpageData_s.chargePeriod_ms_ui16);
+    digitalWrite(GPIO_ENABLE_CHARGE, LOW);
+    delay(100); /* Wait a bit b4 discharging */
+    digitalWrite(GPIO_ENABLE_DISCHARGE, HIGH);
+    delay(globalWebpageData_s.dischargePeriod_ms_ui16);
+    digitalWrite(GPIO_ENABLE_DISCHARGE, LOW);
+    delay(100);
+  }
+  delay(10000); 
+  adcGlobalData_s.storeAdcReadingsFlag_b = false;
   PRINT_LN("Finished SOH Measurement");
-  measureSohFlag_b = false;
+  
+  /* now that we have the data, compute the least squares */
+  soh_result res = soh_LeastSquares(soh_currentMeasurements_mA_f32, soh_voltageMeasurements_mV_f32);
+  PRINT("Calculated internal resistance from SOH Measurement: ");
+  PRINT_LN(res.internalResistance_f32);
+
+  globalWebpageData_s.internalResistanceResult_mOhms_f32 = res.internalResistance_f32 * 1000;
+
+  /* clear the vectors */
+  soh_currentMeasurements_mA_f32.clear();
+  soh_voltageMeasurements_mV_f32.clear();
+
   globalWebpageData_s.measureSohSwitch_b = false;
+  measureSohFlag_b = false;
 }
 
 void Main_SOHTest(uint8 numIter, uint32 period_ms) {

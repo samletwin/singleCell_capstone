@@ -22,8 +22,8 @@
 
 #define AP_SSID "ESP32"
 #define AP_PASS "lolstorm"
-#define LOCAL_SSID ""
-#define LOCAL_PASS ""
+#define LOCAL_SSID "iPhone"
+#define LOCAL_PASS "Andy1234"
 // #define USE_INTRANET
 
 /* ------------------------------------------------------------------------------------------------

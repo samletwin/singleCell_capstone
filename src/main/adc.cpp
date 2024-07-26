@@ -132,6 +132,7 @@ void adc_task(void *pvParameters) {
       globalWebpageData_s.socResult_perc_f32 = 0.0f;
       globalWebpageData_s.internalResistanceResult_mOhms_f32 = 0.0f;
     }
+
     globalWebpageData_s.batteryDetected_b = batteryDetected_b;
 
     if (adcGlobalData_s.storeAdcReadingsFlag_b) {
@@ -149,6 +150,8 @@ void adc_task(void *pvParameters) {
 
     #ifdef DEBUG_ADC_LOG
     Serial.print(voltage_mV);
+    Serial.print(",");
+    Serial.print(globalWebpageData_s.socResult_perc_f32);
     Serial.print(",");
     Serial.println(current_mA);
     #endif

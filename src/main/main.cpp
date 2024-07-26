@@ -117,6 +117,9 @@ void Main_MeasureSOH() {
   PRINT("Calculated internal resistance from SOH Measurement: ");
   PRINT_LN(res.internalResistance_f32);
 
+   PRINT("Calculated SOH from SOH Measurement: ");
+  PRINT_LN(res.internalResistance_f32);
+
   globalWebpageData_s.internalResistanceResult_mOhms_f32 = res.internalResistance_f32 * 1000;
 
   /* clear the vectors */

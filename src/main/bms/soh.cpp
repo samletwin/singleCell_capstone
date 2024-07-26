@@ -23,6 +23,11 @@
   FUNCTION PROTOTYPES
 ------------------------------------------------------------------------------------------------ */
 
+float soh_getSOH(float resistance_f32) {
+  float soh = 100.0f - (1.0f - 96.0f/75.5f)*100.0f;
+  return soh;
+}
+
 /* For least squares, we are finding phi, where phi = [OCV; R_internal] 
   Phi = (A_transpose*A)^-1 * A_t * B
   A is a Nx2 matrix, first column all 1s, second column being the Nth current measurement

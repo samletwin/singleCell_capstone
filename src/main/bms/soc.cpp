@@ -50,7 +50,7 @@ void BatterySOC::update(float current) {
     float deltaSoc = (current * deltaSeconds) / (capacity * 3600 * parallelCells);
 
     // Update SOC
-    soc -= deltaSoc;  // Subtract because positive current means discharging
+    soc += deltaSoc; 
     soc = constrain(soc, 0.0f, 1.0f);
 
     lastUpdateTime = currentTime;

@@ -7,6 +7,7 @@
 #include "timer/timer.h"
 #include <vector>
 #include "bms/soc.h"
+#include "bms/soc_cfg.h"
 #include <cmath>
 
 /* ------------------------------------------------------------------------------------------------
@@ -49,6 +50,7 @@ static MCP3202 adc(ADC_VREF, SPI_CS);
 static TaskHandle_t adcTaskHandle = NULL;
 static esp_timer_handle_t adcTimerHandle = NULL;
 static bool batteryDetected_b = false;
+static BatterySOC batterySoc_classObj = BatterySOC();
 
 /* ------------------------------------------------------------------------------------------------
   FUNCTION PROTOTYPES
@@ -118,16 +120,15 @@ void adc_task(void *pvParameters) {
 
     if (voltage_mV >= 2.0f && !batteryDetected_b) {
       batteryDetected_b = true;
-      float soc_init = soc_initialize(current_mA / 1000.0f, voltage_mV / 1000.0f);
-      globalWebpageData_s.socResult_perc_f32 = soc_init * 100.0f;
+      batterySoc_classObj.initialize((voltage_mV / 1000.0f), 1, 1, SOC_CAPACITY);
+      globalWebpageData_s.socResult_perc_f32 = batterySoc_classObj.getSOC() * 100.0f;
     }
-    else if (voltage_mV != 0.0f) {
-      float soc_updated = soc_update(current_mA / 1000.0f);
-      globalWebpageData_s.socResult_perc_f32 = soc_updated * 100.0f;
+    else if (voltage_mV >= 2.0f) {
+      batterySoc_classObj.update(current_mA / 1000.0f);
+      globalWebpageData_s.socResult_perc_f32 = batterySoc_classObj.getSOC() * 100.0f;
     }
     else {
       batteryDetected_b = false;
-      soc_init(); // Reinitialize SOC when battery is disconnected - also clear any existing results
       globalWebpageData_s.socResult_perc_f32 = 0.0f;
       globalWebpageData_s.internalResistanceResult_mOhms_f32 = 0.0f;
     }
